@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Title</title>
+    <style type="text/css">
+      #content {
+        position: relative;
+        width: 888px;
+        margin: 0 auto;
+        padding: 22px 0 0 0;
+        clear: both;
+      }
+      
+      #temporary {
+        position: absolute;
+        visibility: hidden;
+      }
+
+      .column {
+        position: relative;
+        width: 288px;
+        padding: 0 12px 0 0;
+        float: left;
+      }
+
+      .column.last {
+        padding: 0;
+        float: right;
+      }
+    </style>
+    
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/coffee-script/1.3.1/coffee-script.min.js"></script>
+    <script type="text/javascript" src="http://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.3.3/underscore-min.js"></script>
+
+    <script type="text/javascript">
+      var data = [{name:"Средства связи и навигации",children:[{name:"Радиосвязь",children:[{name:"Радиостанции"},{name:"Антенны"},{name:"Аксессуары"},{name:"Детекторы устройств"},{name:"Разъемы"},{name:"Переходники"}]},{name:"Спутниковое телевидение",children:[{name:"Антенны"},{name:"Пассивные элементы"},{name:"Приемники"},{name:"Конверторы"}]}]},{name:"Охранные системы",children:[{name:"Видеонаблюдение",children:[{name:"Комутационные изделия"},{name:"Видеокамеры"},{name:"Видеорегистраторы"},{name:"Объективы"},{name:"Усилители, распределители и т. д."},{name:"Платы видеозахвата"}]},{name:"Системы контроля доступа",children:[{name:"Домофоны"},{name:"Вызывные панели"},{name:"Замки, доводчики"}]},{name:"Оборудование сигнализации"},{name:"Отделочные материалы",children:[{name:"Приборы приемно-контрольные"},{name:"Датчики и т. д."},{name:"Громкоговорители"}]}]},{name:"Автомобильные товары",children:[{name:"Автомобильная электроника",children:[{name:"Радар-детекторы"}]}]},{name:"Бытовая техника",children:[{name:"Фонари",children:[{name:"Доводчики"}]},{name:"Аксессуары",children:[{name:"Блок питания"},{name:"Батарейки"},{name:"Зарядные устройства"},{name:"Аккумуляторы"}]}]},{name:"Строительство и ремонт",children:[{name:"Замки, доводчики, петли",children:[{name:"Доводчики"}]},{name:"Крепеж фасованный",children:[{name:"Дюбели"},{name:"Ремешки-хомуты"},{name:"Скобы для провода"},{name:"Хомуты"},{name:"Шурупы-саморезы"}]},{name:"Инструмент"},{name:"Отделочные материалы",children:[{name:"Короб"},{name:"Гофра, металлорукав"}]},{name:"Изолента, серпянка, скотч"}]},{name:"Электрооборудование",children:[{name:"Кабель, провод"},{name:"Соединители, клеммные колодки"},{name:"Трубка термоусадочная ТУТ"}]}];
+    </script>
+    <script type="text/coffeescript">
+
+      render_category = (category) ->
+        $container = $("<div></div>")
+        $container.append "<h2>#{category.name}</h2>"
+        $container.append "<ul></ul>"
+        $container.appendTo "#temporary"
+
+        category.container = $container
+
+        render_subcategory = ($container, category) ->
+          $container.append "<li>#{category.name}</li>"
+          
+          if category.children
+            $container.append "<ul></ul>"
+          
+            _.each category.children, (category) ->
+              render_subcategory $container.children("ul"), category
+
+        _.each category.children, (category) ->
+          render_subcategory $container.children("ul"), category
+
+      _.each data, render_category
+
+      sorted_data = _.sortBy data, (category) -> -category.container.height()
+      
+      _.each sorted_data, (category) ->
+        min_column = _.min $('.column'), (el) -> $(el).height()
+        $(min_column).append category.container
+    </script>
+  </head>
+  <body>
+    <div id="temporary"></div>
+
+    <div id="content">
+      <div class="column"></div>
+      <div class="column"></div>
+      <div class="column last"></div>
+    </div>
+  </body>
+</html>
