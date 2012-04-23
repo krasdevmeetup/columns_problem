@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>DevmeetupsColumns</title>
+  <%= stylesheet_link_tag    "application", :media => "all" %>
+  <%= csrf_meta_tags %>
+</head>
+<body>
+  <div id="header"></div>
+  <div id="content">
+    <h1>The columned categories</h1>
+    <div class="columns">
+      <table cellspacing="0">
+        <tr>
+          <% categories_three_columned.each do |colmn| %>
+            <td>
+              <% colmn.each do |croot| %>
+                <h4><%= croot[:name] %></h4>
+                <%= render :partial => "list_of_children", :locals => { :cat => croot } %>
+              <% end %>
+            </td>
+          <% end %>
+        </tr>
+      </table>
+    </div>
+  </div>
+  <div id="footer"></div>
+</body>
+</html>
+
+
+    

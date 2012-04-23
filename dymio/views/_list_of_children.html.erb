@@ -1,0 +1,10 @@
+<% if cat[:children] %>
+<ul>
+  <% cat[:children].each do |sub| %>
+    <li>
+      <p><%= sub[:name] %></p>
+      <%= render :partial => "list_of_children", :locals => { :cat => sub } %>
+    </li>
+  <% end %>
+</ul>
+<% end %>
