@@ -29,16 +29,17 @@ app->start;
 sub columnize {
     my ($count, $categories) = @_;
 
-    # Считаем высоту каждой колонки
+    # Считаем высоту каждой колонки и среднюю высоту
     my @heights = map height(), @$categories;
     my $average = sum(@heights) / $count;
 
     # Сортируем высоты по убыванию, чтобы сначала пойти по жадной ветке
+    # Категории упорядочиваем также, чтобы индексы соответствовали
     my @is = sort {$heights[$b] <=> $heights[$a]} 0..$#heights;
     @heights = @heights[@is];
     my @categories = @$categories[@is];
 
-    # Функция оценки - сумма отклонений от среднего
+    # Функция оценки - сумма модулей отклонений от среднего
     my $score = sub {
         sum map abs($_->{used} - $average), @{ shift() };
     };
@@ -70,6 +71,7 @@ sub columnize {
         \@columns;
     };
 
+    # Лучшее пока найденное решение
     my $best_so_far = undef;
     my $best_score_so_far = ($average * $count - $average) * 2 + 1;
 
@@ -87,12 +89,15 @@ sub columnize {
             }
         } else {
             # Продуцируем все продолжения и выбираем лучшее
+            # Пытаемся распределить категорию $index в каждую колонку по порядку
+            # Т.к. колонки упорядочены от более пустой к заполненной,
+            # то алгоритм сначала идёт по жадной ветке
             for (0..$#$columns) {
                 # Не пытаемся совать в колонку такой же наполненности как предыдущая
                 next if $_ and $$columns[$_]{used} == $$columns[$_-1]{used};
                 # Продуцируем продолжение решения
                 my $next = $added->($columns, $_, $index);
-                # Останавливаемся если оптимистичная оценка хуже уже найденой
+                # Останавливаемся если оптимистичная оценка не лучше уже найденой
                 next if $optimistic_score->($next) >= $best_score_so_far;
 
                 $part->($next, $index + 1);
@@ -104,9 +109,8 @@ sub columnize {
     my @empty_columns = map {used => 0, categories => []}, 1..$count;
     # Решаем задачу
     $part->(\@empty_columns, 0);
-    my $columns = $best_so_far;
 
-    return map [@categories[@{ $_->{categories} }]], @$columns;
+    return map [@categories[@{ $_->{categories} }]], @$best_so_far;
 }
 
 sub children() {
